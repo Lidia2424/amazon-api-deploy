@@ -15,17 +15,22 @@ app.get("/", (req, res) => {
   });
 });
 
-app.post("/payment/create", async (req, res) => {
+app.post("payment/create", async (req, res) => {
   const total = parseInt(req.query.total);
   if (total > 0) {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: total,
-      currency: "usd",
-    });
-    res.status(201).json({ clientSecret: paymentIntent.client_secret });
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        // Corrected this line
+        amount: total,
+        currency: "usd",
+      });
+      res.status(201).json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   } else {
     res.status(403).json({
-      message: "total must be greater than 0",
+      message: "Total must be greater than 0",
     });
   }
 });
